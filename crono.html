@@ -1,0 +1,322 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Cronómetro</title>
+  <style type="text/css">
+    * {
+      margin: auto;
+      padding: 0;
+    }
+
+    h1 {
+      padding: 0.5em;
+      text-align: center;
+    }
+
+    #cronometro {
+      padding: 10px;
+      border: 3px silver solid;
+      width: 200px;
+      text-align: center;
+    }
+
+    #historial {
+      margin: 20px auto;
+      padding: 10px;
+      border: 1px darkgrey solid;
+      width: 400px;
+      text-align: left;
+    }
+
+    #reloj {
+      padding: 5px 10px;
+      width: 170px;
+      border: 3px solid black;
+      font: bold 1.5em digital, europa, arial;
+      text-align: center;
+      margin: 4px
+    }
+
+    #cronometro [type=button] {
+      margin: 4px;
+      font: normal 9pt arial
+    }
+
+    .tempsLletra {
+      margin-bottom: 10px;
+      color: red;
+    }
+  </style>
+
+  <script type="text/javascript">
+
+    var lletra= [
+      "Déu farà un camí",
+      "quan ja no pugui seguir,",
+      "en els temps de dificultat",
+      "sempre m’acompanyarà.",
+      "Ell em guiarà,",
+      "em tindrà a les seves mans",
+      "amb pau i amor, cada matí,",
+      "Déu farà un camí,",
+      "Déu farà un camí.",
+      "Déu farà un camí",
+      "quan ja no pugui seguir,",
+      "en els temps de dificultat",
+      "sempre m’acompanyarà.",
+      "Ell em guiarà,",
+      "em tindrà a les seves mans",
+      "amb pau i amor, cada matí,",
+      "Déu farà un camí,",
+      "Déu farà un camí.",
+      "A través de la tempesta",
+      "Ell em guiarà",
+      "i rius, en el desert, descobriré.",
+      "Terra i cels passaran",
+      "però Ell sempre restarà.",
+      "Coses grans Ell farà en mi.",
+      "Déu farà un camí",
+      "quan ja no pugui seguir,",
+      "en els temps de dificultat",
+      "sempre m’acompanyarà.",
+      "Ell em guiarà,",
+      "em tindrà a les seves mans",
+      "amb pau i amor, cada matí,",
+      "Déu farà un camí,",
+      "Déu farà un camí."
+    ]
+
+    lletra.push("FINAL ULTIM SUBTITOL")
+
+    window.onload = function () {
+      //localiza en pantalla el reloj y se ronombra visor para trabajar con ello
+      visor = document.getElementById("reloj");
+      historial = document.getElementById("historial");
+      reproductor = document.getElementById("reproductor");
+      fmtssa = document.getElementById("fmtssa");
+      //asociar eventos a botones: al pulsar el botón se activa su función.
+      document.cron.empieza.onclick = empezar;
+      document.cron.para.onclick = parar;
+      document.cron.continua.onclick = continuar;
+      document.cron.reinicia.onclick = reiniciar;
+      document.cron.anotacio.onclick = anotacio;
+      document.cron.resetH.onclick = resetHistorial;
+
+      document.form2.botoFSSA.onclick = formatSSA;
+    }
+
+    //variables de inicio:
+    var marcha = 0; //control del temporizador
+    var cro = 0; //estado inicial del cronómetro.
+    //cronometro en marcha. Empezar en 0:
+    var strCrono = ""  // format del temps transcorregut per poder mostrar a la pantalla
+    
+    // var cr = null
+    // var cr2 = null // backup del temps transcorregut (utilitzat despres per tornar a reproduir el cronometre en una linia determinada de la lletra)
+    var arrObjLletra = lletra.map ( function(linia) {
+      return {
+        frase: linia,
+        temps: null,
+        strTemps: null
+      }
+    })
+
+    // var actual = null
+    var anterior = null
+    var comptador = 0
+
+
+    function empezar() {
+      if (marcha == 0) { //solo si el cronómetro esta parado
+        emp = new Date() //fecha actual
+        elcrono = setInterval(tiempo, 10); //función del temporizador.
+        marcha = 1 //indicamos que se ha puesto en marcha.
+        reproductor.play()
+      }
+    }
+
+    function tiempo() { //función del temporizador
+      // comptador++
+      // console.log( "comptador: " + comptador )
+      // console.log( "anterior: " + anterior )
+      if ( anterior != null ){
+        actual = anterior
+        anterior = null
+      } else {
+        actual = new Date() //fecha en el instante
+      }
+      // console.log("actual: " + actual)
+
+      cro = actual - emp //tiempo transcurrido en milisegundos
+      cr = new Date() //fecha donde guardamos el tiempo transcurrido
+      cr.setTime(cro) //nos da la fecha en milisegundos
+
+      cs = cr.getMilliseconds() //milisegundos del cronómetro
+      cs = cs / 10; //paso a centésimas de segundo.
+      cs = Math.round(cs) //despreciamos los decimales
+      sg = cr.getSeconds(); //segundos del cronómetro
+      mn = cr.getMinutes(); //minutos del cronómetro
+      ho = cr.getHours() - 1; //horas del cronómetro
+      if (cs < 10) { cs = "0" + cs; }  //se ponen siempre 2 cifras en los números
+      if (sg < 10) { sg = "0" + sg; }
+      if (mn < 10) { mn = "0" + mn; }
+      strCrono = ho + ":" + mn + ":" + sg + "." + cs;
+      visor.innerHTML = strCrono; //pasar a pantalla.
+    }
+
+    //parar el cronómetro
+    function parar() {
+      if (marcha == 1) { //sólo si está en funcionamiento
+        clearInterval(elcrono); //parar el crono
+        marcha = 0; //indicar que está parado.
+        reproductor.pause();
+      }
+    }
+
+    //Continuar una cuenta empezada y parada.
+    function continuar() {
+      if (marcha == 0) { //sólo si el crono está parado
+        if ( anterior != null){
+          emp2 = anterior
+          anterior = null;
+        } else {
+          emp2 = new Date(); //fecha actual
+        }
+
+        emp2 = emp2.getTime(); //pasar a tiempo Unix
+        emp3 = emp2 - cro; //restar tiempo anterior
+        emp = new Date(); //nueva fecha inicial para pasar al temporizador
+        emp.setTime(emp3); //datos para nueva fecha inicial.
+        elcrono = setInterval(tiempo, 10); //activar temporizador
+        marcha = 1; //indicamos que se ha puesto en marcha.
+      }
+    }
+
+    //Volver al estado inicial
+    function reiniciar() {
+      if (marcha == 1) { //si el cronómetro está en marcha:
+        clearInterval(elcrono); //parar el crono
+        marcha = 0;   //indicar que está parado
+      }
+      cro = 0; //tiempo transcurrido a cero
+      visor.innerHTML = "0:00:00.00"; //se escribe en el visor todo a 0
+    }
+
+
+    function anotacio (){
+      var node = document.createElement("DIV");
+      var textnode = document.createTextNode(strCrono);         // Create a text node
+      node.appendChild(textnode);                              // Append the text to <DIV>
+      historial.appendChild(node)
+    }
+
+    function resetHistorial (){
+      
+      historial.innerHTML = ""
+      arrObjLletra.forEach( function(obj) {
+        
+        // div amb la lletra
+        var node = document.createElement("DIV");
+        var textnode = document.createTextNode(obj.frase);         // Create a text node
+        node.appendChild(textnode);     // Append the text to <DIV>
+        node.addEventListener("click", function(){
+          parar()    // aturem el crono
+          anterior = obj.temps   // assigna a "anterior" el temps que hi ha registrat
+          console.log("anterior: " + anterior)
+          tiempo()  // mostrem per pantalla el temps registrat
+          
+          reproductor.pause()
+          // reproductor.currentTime = obj.temps
+          marcha = 0
+        })                             
+        historial.appendChild(node)
+
+        // div amb el temps
+        var node2 = document.createElement("DIV");
+        var textnode2 = document.createTextNode("clica per registrar temps");
+        node2.appendChild(textnode2);
+        node2.addEventListener("click", function(){
+          node2.innerHTML = strCrono
+          obj.temps = actual
+          obj.strTemps = strCrono
+          // console.log("obj.temps: " + obj.temps)
+          // textnode2 = document.createTextNode(strCrono);
+          // node.appendChild(textnode);
+        });
+        node2.setAttribute("class", "tempsLletra");
+        historial.appendChild(node2)       
+      })
+      
+    }
+
+
+    function formatSSA () {
+      
+      arrObjLletra.forEach( function(obj) {
+        var node4 = document.createElement("DIV")
+        var str = "Style: Style15,Arial,75,16777215,0,0,0,0,0,-1,0,0,2,5,5,5,0,0"
+        var textnode4 = document.createTextNode(str)
+        node4.appendChild(textnode4)
+        fmtssa.appendChild(node4)
+      })
+      
+      
+      
+      
+      
+      arrObjLletra.forEach ( function(obj, index, array) {
+        
+        // per a tots els objectes menys l'ultim
+        if (index != array.length - 1) {
+          var node3 = document.createElement("DIV")
+          
+          var str = "Dialogue: Marked=0," // text inicial de la "frase"
+          str += obj.strTemps   // temps inici subtitol
+          str += ","
+          str += array[index + 1].strTemps  // temps del final sera el temps d'inici del seguent objecte
+          str += ",Style1,,0000,0000,0000,!Effect,"
+          str += obj.frase
+
+          var textnode3 = document.createTextNode(str);
+          node3.appendChild(textnode3);
+          fmtssa.appendChild(node3)
+        } 
+        
+        
+        
+      })
+    }
+  </script>
+</head>
+
+<body>
+  <h1>CRONÓMETRO con Javascript</h1>
+  <hr>
+  <audio id="reproductor" controls>
+    <source src="https://docs.google.com/uc?export=&id=1B94whTZEqkt-TO96BV3ySDbRLL900bTj" />
+  </audio>
+  <div id="cronometro">
+    <div id="reloj">0 : 00 : 00 : 00</div>
+    <!--cornómetro-->
+    <form name="cron" action="#">
+      <!--botones-->
+      <input type="button" value="Empezar" name="empieza" />
+      <input type="button" value="Parar" name="para" /><br />
+      <input type="button" value="Continuar" name="continua" />
+      <input type="button" value="Reiniciar" name="reinicia" />
+      <input type="button" value="Anotació" name="anotacio" />
+      <input type="button" value="ResetH" name="resetH" />
+    </form>
+    <h6></h6>
+  </div>
+  <div id="historial"></div>
+
+  <form name="form2" action="#">
+    <input type="button" value="format SSA" name="botoFSSA" />
+  </form>
+  <pre id="fmtssa"></pre>
+
+</body>
+
+</html>
