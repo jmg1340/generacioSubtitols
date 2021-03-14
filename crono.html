@@ -31,11 +31,10 @@
     }
 
     #historial {
-      margin: 20px auto;
-      padding: 10px;
+      margin: 5px auto;
+      padding: 5px;
       border: 1px darkgrey solid;
-      width: 400px;
-      text-align: left;
+      /* text-align: left; */
     }
 
     #reloj {
@@ -96,8 +95,6 @@
       "Déu farà un camí."
     ]
 
-    lletra.push("FINAL ULTIM SUBTITOL")
-
     window.onload = function () {
       //localiza en pantalla el reloj y se ronombra visor para trabajar con ello
       visor = document.getElementById("reloj");
@@ -119,19 +116,21 @@
     var marcha = 0; //control del temporizador
     var cro = 0; //estado inicial del cronómetro.
     //cronometro en marcha. Empezar en 0:
-    var strCrono = ""  // format del temps transcorregut per poder mostrar a la pantalla
+    var strCrono = "0:00:00.00"  // format del temps transcorregut per poder mostrar a la pantalla
     
     // var cr = null
     // var cr2 = null // backup del temps transcorregut (utilitzat despres per tornar a reproduir el cronometre en una linia determinada de la lletra)
     var arrObjLletra = lletra.map ( function(linia) {
       return {
         frase: linia,
-        temps: null,
-        strTemps: null
+        tempsInicial: null,
+        strTempsInicial: null,
+        tempsFinal: null,
+        strTempsFinal: null,
       }
     })
 
-    // var actual = null
+    var actual = 0
     var anterior = null
     var comptador = 0
 
@@ -199,6 +198,8 @@
         emp.setTime(emp3); //datos para nueva fecha inicial.
         elcrono = setInterval(tiempo, 10); //activar temporizador
         marcha = 1; //indicamos que se ha puesto en marcha.
+
+        reproductor.play();
       }
     }
 
@@ -210,6 +211,10 @@
       }
       cro = 0; //tiempo transcurrido a cero
       visor.innerHTML = "0:00:00.00"; //se escribe en el visor todo a 0
+
+      reproductor.load();
+      historial.innerHTML = ""
+      strCrono = "0:00:00.00"
     }
 
 
@@ -220,15 +225,46 @@
       historial.appendChild(node)
     }
 
+
+
     function resetHistorial (){
       
       historial.innerHTML = ""
-      arrObjLletra.forEach( function(obj) {
+      
+      arrObjLletra.forEach( function(obj, index, array) {
+            
+        // DIV DE REGISTRE
+        var nodeR = document.createElement("DIV");
+        nodeR.setAttribute("class", "row m-3 px-3 card-footer");
         
-        // div amb la lletra
-        var node = document.createElement("DIV");
+        // DIV AMB EL TEMPS INICIAL
+        var nodeTI = document.createElement("DIV");
+        var textnodeTI = document.createTextNode("inici");
+        nodeTI.appendChild(textnodeTI);
+        nodeTI.addEventListener("click", function(){
+          nodeTI.innerHTML = strCrono
+          obj.tempsInicial = actual
+          obj.strTempsInicial = strCrono
+
+          // si el temps final de l'anterior registre es null, posar el mateix temps que l'inical d'aquest
+          if ( index != 0 ){ 
+            if (array[index - 1].tempsFinal == null){
+              array[index - 1].tempsFinal = actual
+              array[index - 1].strTempsFinal = strCrono
+              nodeTI.parentNode.previousSibling.lastChild.innerHTML = strCrono
+            }
+          }
+            
+        });
+        nodeTI.setAttribute("class", "col-2 btn btn-warning text-center");
+        nodeR.appendChild(nodeTI)       
+      
+ 
+      
+        // DIV AMB LA LLETRA
+        var nodeLl = document.createElement("DIV");
         var textnode = document.createTextNode(obj.frase);         // Create a text node
-        node.appendChild(textnode);     // Append the text to <DIV>
+        nodeLl.appendChild(textnode);     // Append the text to <DIV>
         
         // node.addEventListener("click", function(){
         //   parar()    // aturem el crono
@@ -240,25 +276,33 @@
         //   // reproductor.currentTime = obj.temps
         //   marcha = 0
         // })
+        nodeLl.setAttribute("class", "col");
+        nodeR.appendChild(nodeLl)
 
-        historial.appendChild(node)
 
-        // div amb el temps
-        var node2 = document.createElement("DIV");
-        var textnode2 = document.createTextNode("clica per registrar temps");
-        node2.appendChild(textnode2);
-        node2.addEventListener("click", function(){
-          node2.innerHTML = strCrono
-          obj.temps = actual
-          obj.strTemps = strCrono
-          // console.log("obj.temps: " + obj.temps)
-          // textnode2 = document.createTextNode(strCrono);
+        // DIV AMB EL TEMPS FINAL
+        var nodeTF = document.createElement("DIV");
+        var textnodeTF = document.createTextNode("final");
+        nodeTF.appendChild(textnodeTF);
+        nodeTF.addEventListener("click", function(){
+          nodeTF.innerHTML = strCrono
+          obj.tempsFinal = actual
+          obj.strTempsFinal = strCrono
+
+          // console.log("obj.tempsFinal: " + obj.tempsFinal)
+          // textnodeTF = document.createTextNode(strCrono);
           // node.appendChild(textnode);
         });
-        node2.setAttribute("class", "btn btn-danger mb-3");
-        historial.appendChild(node2)       
+        nodeTF.setAttribute("class", "col-2 btn btn-warning text-center");
+        nodeR.appendChild(nodeTF) 
+        
+        
+
+        historial.appendChild(nodeR)
       })
-      
+ 
+
+
     }
 
 
@@ -300,26 +344,27 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
       arrObjLletra.forEach ( function(obj, index, array) {
         
         // per a tots els objectes menys l'ultim
-        if (index != array.length - 1) {
-          var node3 = document.createElement("DIV")
-          
-          var str2 = "Dialogue: Marked=0," // text inicial de la "frase"
-          str2 += obj.strTemps   // temps inici subtitol
-          str2 += ","
-          str2 += array[index + 1].strTemps  // temps del final sera el temps d'inici del seguent objecte
-          str2 += ",Style1,,0000,0000,0000,!Effect,"
-          str2 += obj.frase + "\n"
+        // var node3 = document.createElement("DIV")
+        
+        var str2 = "Dialogue: Marked=0," // text inicial de la "frase"
+        str2 += obj.strTempsInicial   // temps inici subtitol
+        str2 += ","
+        str2 += obj.strTempsFinal  // temps del final sera el temps d'inici del seguent objecte
+        str2 += ",Style1,,0000,0000,0000,!Effect,"
+        str2 += obj.frase + "\n"
 
-          str += str2
-          // var textnode3 = document.createTextNode(str);
-          // node3.appendChild(textnode3);
-          // fmtssa.appendChild(node3)
-        } 
+        str += str2
+        // var textnode3 = document.createTextNode(str);
+        // node3.appendChild(textnode3);
+        // fmtssa.appendChild(node3)
         
-        
-        fmtssa.innerHTML= str
       })
+
+      fmtssa.innerHTML = str
+
     }
+
+
   </script>
 </head>
 
@@ -331,7 +376,7 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     </header>
     
     <div class="row mb-5">
-      <div class="col text-center">
+      <div class="col-4 text-center">
         <audio id="reproductor" controls>
           <source src="https://docs.google.com/uc?export=&id=1B94whTZEqkt-TO96BV3ySDbRLL900bTj" />
         </audio>
@@ -340,7 +385,7 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
           <!--cornómetro-->
           <form name="cron" action="#">
             <!--botones-->
-            <input type="button" value="Empezar" name="empieza" class="btn btn-dark" />
+            <input type="button" value="Començar" name="empieza" class="btn btn-dark" />
             <input type="button" value="Parar" name="para" class="btn btn-dark" /><br class="btn btn-dark" />
             <input type="button" value="Continuar" name="continua" class="btn btn-dark" />
             <input type="button" value="Reiniciar" name="reinicia" class="btn btn-dark" />
@@ -360,9 +405,9 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     <div class="container bg-gray-400">
       <hr>
       <form name="form2" action="#">
-        <input type="button" value="format SSA" name="botoFSSA" class="btn btn-primary"/>
+        <input type="button" value="Generar contingut fitxer SSA" name="botoFSSA" class="btn btn-primary"/>
       </form>
-      <pre id="fmtssa" class="bg-light"></pre>      
+      <pre id="fmtssa" class="bg-light mt-3"></pre>      
     </div>
 
 
