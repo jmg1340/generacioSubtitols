@@ -137,12 +137,20 @@ function reiniciar() {
 }
 
 
+
+
+
+
 function anotacio (){
 	var node = document.createElement("DIV");
 	var textnode = document.createTextNode(strCrono);         // Create a text node
 	node.appendChild(textnode);                              // Append the text to <DIV>
 	historial.appendChild(node)
 }
+
+
+
+
 
 
 
@@ -160,7 +168,7 @@ function resetHistorial (){
 		// DIV AMB BOTO DE COMENÇAR EN AQUEST PUNT
 		var nodeDivBoto = document.createElement("DIV");
 		var nodeBoto = document.createElement("BUTTON");
-		nodeBoto.innerHTML = "Aquí";
+		nodeBoto.innerHTML = '->'
 		nodeBoto.addEventListener("click", function(){
 
 			actual = obj.tempsInicial

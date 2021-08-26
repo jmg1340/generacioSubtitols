@@ -64,20 +64,25 @@
 <body>
   <div class="container">
     <header>
-      <div class="display-4 text-center mt-3">CRONÒMETRE cançons</div>
+      <div class="display-6 text-center mt-2">CRONÒMETRE cançons</div>
       <hr>
     </header>
     
     <div class="row mb-5">
       <div class="col-4 text-center">
-        <audio id="reproductor" controls>
-          <source id="reproductor_source" src="https://docs.google.com/uc?export=&id=1yXCBmob8KZtef04DyTYTYjCeHscsjM1v" />
+        
+				<!-- reproductor -->
+				<audio id="reproductor" controls>
+          <source id="reproductor_source" src="https://docs.google.com/uc?export=&id=1AbbbX3yAdRa7BazMU5Lw0AYhEfuBEToB" />
         </audio>
+
+
+				<!--cornómetro-->
         <div id="cronometro" class="mt-5">
           <div id="reloj">0:00:00.00</div>
-          <!--cornómetro-->
+          
           <form name="cron" action="#">
-            <!--botones-->
+            <!--botones cronometro-->
             <input type="button" value="Començar" name="empieza" class="btn btn-dark" />
             <input type="button" value="Parar" name="para" class="btn btn-dark" /><br class="btn btn-dark" />
             <input type="button" value="Continuar" name="continua" class="btn btn-dark" />
@@ -85,22 +90,33 @@
             <input type="button" value="Anotació" name="anotacio" class="btn btn-danger" />
             <input type="button" value="Lletra" name="resetH" class="btn btn-danger" />
           </form>
-          <h6></h6>
         </div>
 
+				<!-- boto fitxer SSA -->
+        <div class="mt-5">
+					<form name="form2" action="#">
+						<input type="button" value="Generar contingut fitxer SSA" name="botoFSSA" class="btn btn-primary"/>
+					</form>
+				</div>
+
       </div>
+
+
+
+			<!-- area RESULTATS -->
       <div class="col">
         <div class="fs-2">Resultats</div>
-        <div id="historial"></div>
+        <div id="historial" style="overflow-y:scroll; height:400px;"></div>
       </div>
     </div>
     
+
+
+		<!-- contingut fitxer SSA -->
     <div class="container bg-gray-400">
       <hr>
-      <form name="form2" action="#">
-        <input type="button" value="Generar contingut fitxer SSA" name="botoFSSA" class="btn btn-primary"/>
-      </form>
-      <pre id="fmtssa" class="bg-light mt-3"></pre>      
+
+      <pre id="fmtssa" class="bg-light mt-1"></pre>      
     </div>
 
 
